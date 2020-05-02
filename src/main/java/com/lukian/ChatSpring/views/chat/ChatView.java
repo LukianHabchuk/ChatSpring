@@ -68,6 +68,40 @@ public class ChatView extends HorizontalLayout {
         setStyles();
     }
 
+    public HorizontalLayout sendLineComponent() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidth("75%");
+        layout.add(area,pic,send);
+
+        send.addClickListener(e -> {
+            messageService.saveMessage(new Message(area.getValue(), curentUser, new Date()));//save to data
+            fillList(new Message(area.getValue(), curentUser, new Date()));//add to the allMessagesLayout new message
+            area.setValue("");//clear input area
+        });
+
+        pic.addClickListener(e -> {
+            dialog.open();
+            //At the moment, get the file name, put it in the area and thus make sure that it works
+            dialog.addDialogCloseActionListener(ev ->{
+                area.setValue(exampleUpload.getFilename());
+                dialog.close();
+            });
+        });
+
+        return layout;
+    }
+
+    private void fillList(Message message) {
+        if (message == null) {
+            //add all messages from the db
+            messageService.findAllMessages().forEach(m -> allMessagesLayout.add(new MessageComponent(m)));
+        } else {
+            //add single message
+            allMessagesLayout.add(new MessageComponent(message));
+        }
+    }
+
+    //in future versions, remove this function and transfer it to the css file
     private void setStyles() {
         setSizeFull();
         allMessagesLayout.getStyle().set("overflow", "auto");//you can scroll through messages using this
@@ -80,33 +114,4 @@ public class ChatView extends HorizontalLayout {
         dialog.setHeight("150px");
     }
 
-    public HorizontalLayout sendLineComponent() {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setWidth("75%");
-        layout.add(area,pic,send);
-
-        send.addClickListener(e -> {
-            messageService.saveMessage(new Message(area.getValue(), curentUser, new Date()));
-            fillList(new Message(area.getValue(), curentUser, new Date()));
-            area.setValue("");
-        });
-
-        pic.addClickListener(e -> {
-            dialog.open();
-            dialog.addDialogCloseActionListener(ev ->{
-                area.setValue(exampleUpload.getFilename());
-                dialog.close();
-            });
-        });
-
-        return layout;
-    }
-
-    private void fillList(Message message) {
-        if (message == null) {
-            messageService.findAllMessages().forEach(m -> allMessagesLayout.add(new MessageComponent(m)));
-        } else {
-            allMessagesLayout.add(new MessageComponent(message));
-        }
-    }
 }
