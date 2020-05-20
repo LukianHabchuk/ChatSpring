@@ -1,8 +1,10 @@
 package com.lukian.ChatSpring.service;
 
 import com.lukian.ChatSpring.entity.Message;
+import com.lukian.ChatSpring.entity.MessageType;
 import com.lukian.ChatSpring.entity.User;
 import com.lukian.ChatSpring.repo.MessageRepo;
+import com.vaadin.flow.component.html.Label;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,8 @@ class MessageServiceTest {
     @Test
     void saveMessage() {
         int before = messageService.findAllMessages().size();
-        messageService.saveMessage(new Message("body",user, new Date()));
+        String s = "body";
+        messageService.saveMessage(new Message(s.getBytes(), MessageType.Text,user, new Date()));
         assertEquals(before+1, messageService.findAllMessages().size());
     }
 

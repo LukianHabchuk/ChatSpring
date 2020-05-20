@@ -1,10 +1,9 @@
 package com.lukian.ChatSpring.entity;
 
-import org.hibernate.validator.constraints.Length;
-
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name = "msg")
@@ -12,9 +11,11 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @NotBlank(message = "Please fill the message")
-    @Length(max = 2048, message = "Message too long (more than 2kB)")
-    private String body;
+    @NotNull
+    private byte[] body;
+    @NotNull
+    private MessageType type;
+    @NotNull
     private Date date;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
@@ -23,26 +24,27 @@ public class Message {
     public Message() {
     }
 
-    public Message(String body, User user, Date date) {
+    public Message(byte[] body, MessageType type, User user, Date date) {
         this.body = body;
-        this.user = user;
+        this.type = type;
         this.date = date;
+        this.user = user;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getBody() {
+    public byte[] getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public MessageType getType() {
+        return type;
+    }
+
+    public void setType(MessageType type) {
+        this.type = type;
     }
 
     public User getUser() {
@@ -57,7 +59,19 @@ public class Message {
         return date;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Message)) return false;
+        Message message = (Message) o;
+        return getId().equals(message.getId()) &&
+                getBody().equals(message.getBody()) &&
+                getDate().equals(message.getDate()) &&
+                getUser().equals(message.getUser());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getBody(), getDate(), getUser());
     }
 }

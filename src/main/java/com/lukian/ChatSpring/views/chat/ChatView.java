@@ -1,6 +1,7 @@
 package com.lukian.ChatSpring.views.chat;
 
 import com.lukian.ChatSpring.entity.Message;
+import com.lukian.ChatSpring.entity.MessageType;
 import com.lukian.ChatSpring.entity.User;
 import com.lukian.ChatSpring.repo.MessageRepo;
 import com.lukian.ChatSpring.repo.UserRepo;
@@ -33,13 +34,15 @@ public class ChatView extends HorizontalLayout {
     private TextField area = new TextField();
     private Button pic = new Button(VaadinIcon.PICTURE.create());
     private Button send = new Button(VaadinIcon.PLAY.create());
+    private Button add = new Button("Add");
+    private Button cancel = new Button("Cancel");
     private VerticalLayout allMessagesLayout = new VerticalLayout();//collect all message components
 
     private MessageService messageService;
     private UserService userService;
     private User curentUser;
     private Dialog dialog;
-    private ExampleUpload exampleUpload = new ExampleUpload();
+    private ExampleUpload exampleUpload;
 
     private Logger logger = Logger.getAnonymousLogger();
 
@@ -51,6 +54,7 @@ public class ChatView extends HorizontalLayout {
         messageService = new MessageService(messageRepo);
         userService = new UserService(userRepo);
         curentUser= userService.getCurentUser();
+        exampleUpload = new ExampleUpload();
         dialog = new Dialog();
         dialog.add(exampleUpload);
 
@@ -74,16 +78,34 @@ public class ChatView extends HorizontalLayout {
         layout.add(area,pic,send);
 
         send.addClickListener(e -> {
-            messageService.saveMessage(new Message(area.getValue(), curentUser, new Date()));//save to data
-            fillList(new Message(area.getValue(), curentUser, new Date()));//add to the allMessagesLayout new message
-            area.setValue("");//clear input area
+            //save to data
+            messageService.saveMessage(new Message(area.getValue().getBytes(), MessageType.Text, curentUser, new Date()));
+            //add to the allMessagesLayout new message
+            fillList(new Message(area.getValue().getBytes(), MessageType.Text,curentUser, new Date()));
+            //clear input area
+            area.setValue("");
         });
 
         pic.addClickListener(e -> {
             dialog.open();
-            //At the moment, get the file name, put it in the area and thus make sure that it works
-            dialog.addDialogCloseActionListener(ev ->{
-                area.setValue(exampleUpload.getFilename());
+            HorizontalLayout dialoglayout = new HorizontalLayout();
+            dialoglayout.addAndExpand(add,cancel);
+            exampleUpload.add(dialoglayout);
+
+            add.addClickListener(ee->{
+                if(exampleUpload.getFile()!=null){
+                    try{
+                        messageService.saveMessage(new Message(exampleUpload.getByteCode(),
+                                MessageType.Image, curentUser, new Date()));
+                    } catch (Exception exc) {
+                        System.out.println("exception: "+exc);
+                    }
+                    fillList(new Message(exampleUpload.getByteCode(), MessageType.Image, curentUser, new Date()));
+                }
+                dialog.close();
+            });
+
+            cancel.addClickListener(ev -> {
                 dialog.close();
             });
         });

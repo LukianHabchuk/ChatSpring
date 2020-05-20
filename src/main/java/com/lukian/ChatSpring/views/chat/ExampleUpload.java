@@ -30,11 +30,16 @@ import java.util.Iterator;
 @Route("upload")
 public class ExampleUpload extends VerticalLayout {
 
+    private static final int MAXHEIGHT = 549;
+    private static final int MAXWIDTH = 549;
+    private byte[] byteCode;
     private Component file;
-    private String filename;
+    private Div output;
 
     public ExampleUpload(){
-        Div output = new Div();
+        output = new Div();
+        output.setWidth("auto");
+        output.setHeight("auto");
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
 
@@ -71,11 +76,16 @@ public class ExampleUpload extends VerticalLayout {
                             reader.setInput(in);
                             image.setWidth(reader.getWidth(0) + "px");
                             image.setHeight(reader.getHeight(0) + "px");
+                            if(reader.getWidth(0)>MAXWIDTH)
+                                image.setWidth(MAXWIDTH + "px");
+                            if(reader.getHeight(0)>MAXHEIGHT)
+                                image.setHeight(MAXHEIGHT + "px");
                         } finally {
                             reader.dispose();
                         }
                     }
                 }
+                setByteCode(bytes);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -107,7 +117,10 @@ public class ExampleUpload extends VerticalLayout {
         outputContainer.add(p);
         outputContainer.add(content);
         setFile(content);
-        setFilename(text);
+    }
+
+    public void setOutput(Div output) {
+        this.output = output;
     }
 
     public Component getFile() {
@@ -118,11 +131,11 @@ public class ExampleUpload extends VerticalLayout {
         this.file = file;
     }
 
-    public String getFilename() {
-        return filename;
+    public byte[] getByteCode() {
+        return byteCode;
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setByteCode(byte[] byteCode) {
+        this.byteCode = byteCode;
     }
 }

@@ -1,11 +1,12 @@
 package com.lukian.ChatSpring;
 
 import com.lukian.ChatSpring.entity.Message;
+import com.lukian.ChatSpring.entity.MessageType;
 import com.lukian.ChatSpring.entity.Role;
 import com.lukian.ChatSpring.entity.User;
-import com.lukian.ChatSpring.repo.MessageRepo;
-import com.lukian.ChatSpring.repo.UserRepo;
+import com.lukian.ChatSpring.service.MessageService;
 import com.lukian.ChatSpring.service.UserService;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -18,24 +19,34 @@ import java.util.*;
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
 public class ChatSpringApplication {
 
-//	@Autowired
-//	UserService userService;
+	@Autowired
+	UserService userService;
+	@Autowired
+	MessageService messageService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ChatSpringApplication.class, args);
 	}
 
-//	@PostConstruct
-//	void init() {
-//		Set<Role> roles = new HashSet<>();
-//		roles.add(Role.USER);
-//		roles.add(Role.ADMIN);
-//		User user = new User("user","email1","pass",VaadinIcon.PICTURE.create());
-//		User user1 = new User("nick","email1","pass",VaadinIcon.USER.create());
-//		user.setRoles(roles);
-//
-//		userService.addUser(user);
-//		userService.addUser(user1);
-//	}
+	@PostConstruct
+	void init() {
+		Set<Role> roles = new HashSet<>();
+		roles.add(Role.USER);
+		roles.add(Role.ADMIN);
+		User user = new User("user","email","pass",VaadinIcon.USER.create());
+		User user1 = new User("nick","email1","pass",VaadinIcon.USER.create());
+		user.setRoles(roles);
+		userService.addUser(user);
+		userService.addUser(user1);
+
+		String s = "message label";
+		Message m1 = new Message(s.getBytes(), MessageType.Text,user, new Date());
+		try{
+			messageService.saveMessage(m1);
+		}
+		catch (Exception e) {
+			System.out.println("erroor: "+e);
+		}
+	}
 
 }
