@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.UnicastProcessor;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -26,6 +29,16 @@ public class ChatSpringApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ChatSpringApplication.class, args);
+	}
+
+	@Bean
+	UnicastProcessor<Message> publisher() {
+		return UnicastProcessor.create();
+	}
+
+	@Bean
+	Flux<Message> messageFlux(UnicastProcessor<Message> publicher) {
+		return publisher().replay(30).autoConnect();
 	}
 
 	@PostConstruct

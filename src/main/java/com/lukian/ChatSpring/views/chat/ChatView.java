@@ -15,11 +15,14 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.UnicastProcessor;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -29,8 +32,11 @@ import java.util.logging.Logger;
 @Transactional
 @PageTitle("Vaadin ChatView")
 @CssImport("./static/styles/styles.css")
+@Push
 public class ChatView extends HorizontalLayout {
 
+    private final UnicastProcessor<Message> publisher;
+    private final Flux<Message> messageFlux;
     private TextField area = new TextField();
     private Button pic = new Button(VaadinIcon.PICTURE.create());
     private Button send = new Button(VaadinIcon.PLAY.create());
@@ -46,11 +52,13 @@ public class ChatView extends HorizontalLayout {
 
     private Logger logger = Logger.getAnonymousLogger();
 
-    @Autowired
-    public ChatView(MessageRepo messageRepo, UserRepo userRepo) {
+    public ChatView(MessageRepo messageRepo, UserRepo userRepo,
+                    UnicastProcessor<Message> publisher, Flux<Message> messageFlux) {
         VerticalLayout placeForChatComponents = new VerticalLayout();
         getStyle().set("background-color","#f5f5f5");
 
+        this.publisher = publisher;
+        this.messageFlux = messageFlux;
         messageService = new MessageService(messageRepo);
         userService = new UserService(userRepo);
         curentUser= userService.getCurentUser();
@@ -68,7 +76,8 @@ public class ChatView extends HorizontalLayout {
         add(placeForChatComponents);
 
         //fill list of messages
-        fillList(null);
+        fillList();
+        addNewMessage();
         setStyles();
     }
 
@@ -76,14 +85,21 @@ public class ChatView extends HorizontalLayout {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setWidth("75%");
         layout.add(area,pic,send);
+        area.focus();
 
         send.addClickListener(e -> {
-            //save to data
-            messageService.saveMessage(new Message(area.getValue().getBytes(), MessageType.Text, curentUser, new Date()));
             //add to the allMessagesLayout new message
-            fillList(new Message(area.getValue().getBytes(), MessageType.Text,curentUser, new Date()));
-            //clear input area
-            area.setValue("");
+            if(!area.getValue().isEmpty()){
+                try {
+                    publisher.onNext(new Message(area.getValue().getBytes(), MessageType.Text, curentUser, new Date()));
+                } catch (Exception exc) {
+                    System.out.println("exception: "+exc);
+                    System.out.println(getUI().get().isEnabled());
+                    System.out.println(getUI().get().isClosing());
+                }
+            }
+            area.clear();
+            area.focus();
         });
 
         pic.addClickListener(e -> {
@@ -95,32 +111,43 @@ public class ChatView extends HorizontalLayout {
             add.addClickListener(ee->{
                 if(exampleUpload.getFile()!=null){
                     try{
-                        messageService.saveMessage(new Message(exampleUpload.getByteCode(),
-                                MessageType.Image, curentUser, new Date()));
-                    } catch (Exception exc) {
-                        System.out.println("exception: "+exc);
-                    }
-                    fillList(new Message(exampleUpload.getByteCode(), MessageType.Image, curentUser, new Date()));
+                        publisher.onNext(new Message(exampleUpload.getByteCode(), MessageType.Image, curentUser, new Date()));
+                    } catch (Exception exc) { System.out.println("exception: "+exc); }
                 }
                 dialog.close();
             });
 
-            cancel.addClickListener(ev -> {
-                dialog.close();
-            });
+            cancel.addClickListener(ev -> dialog.close());
+
+            area.focus();
         });
 
         return layout;
     }
 
-    private void fillList(Message message) {
-        if (message == null) {
-            //add all messages from the db
-            messageService.findAllMessages().forEach(m -> allMessagesLayout.add(new MessageComponent(m)));
-        } else {
-            //add single message
-            allMessagesLayout.add(new MessageComponent(message));
-        }
+    private void addNewMessage() {
+        messageFlux.subscribe(message -> {
+            getUI().ifPresent(ui ->
+                    ui.access(() ->
+                            {
+                                //save to data
+                                messageService.saveMessage(message);
+                                //add single message
+                                allMessagesLayout.add(new MessageComponent(message));
+                                send.click();
+                                scrollToBottom();
+                            })
+                    );
+        });
+    }
+
+    private void fillList() {
+        //add all messages from the db
+        messageService.findAllMessages().forEach(m -> allMessagesLayout.add(new MessageComponent(m)));
+        scrollToBottom();
+    }
+
+    private void scrollToBottom() {
         //autoscroll to bottom
         allMessagesLayout.getElement().getChild(allMessagesLayout.getComponentCount()-1).callJsFunction("scrollIntoView");
     }
