@@ -121,6 +121,8 @@ public class ChatView extends HorizontalLayout {
             //add single message
             allMessagesLayout.add(new MessageComponent(message));
         }
+        //autoscroll to bottom
+        allMessagesLayout.getElement().getChild(allMessagesLayout.getComponentCount()-1).callJsFunction("scrollIntoView");
     }
 
     //in future versions, remove this function and transfer it to the css file
