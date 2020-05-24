@@ -37,12 +37,12 @@ public class MessageComponent extends HorizontalLayout {
         formatL.getStyle().set("color", "blue");
         layout.getStyle().set("overflow", "auto");
         layout.getStyle().set("border", "1px solid");
+        layout.getStyle().set("border-radius","5px");
         layout.setWidth("85%");
         setHeight("auto");
     }
 
     public Image addElement(byte[] decodedBytes){
-//        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
         Image image = new Image();
 
         StreamResource resource = new StreamResource("name", () -> new ByteArrayInputStream(decodedBytes));

@@ -23,6 +23,7 @@ public class LeftBarComponent extends VerticalLayout {
         getStyle().set("margin-top","80px");
         getStyle().set("margin-left","40px");
         getStyle().set("border", "1px solid");
+        getStyle().set("border-radius","5px");
     }
 
 }

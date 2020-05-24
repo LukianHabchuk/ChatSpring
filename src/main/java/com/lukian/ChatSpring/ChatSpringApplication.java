@@ -6,7 +6,6 @@ import com.lukian.ChatSpring.entity.Role;
 import com.lukian.ChatSpring.entity.User;
 import com.lukian.ChatSpring.service.MessageService;
 import com.lukian.ChatSpring.service.UserService;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -46,8 +45,8 @@ public class ChatSpringApplication {
 		Set<Role> roles = new HashSet<>();
 		roles.add(Role.USER);
 		roles.add(Role.ADMIN);
-		User user = new User("user","email","pass",VaadinIcon.USER.create());
-		User user1 = new User("nick","email1","pass",VaadinIcon.USER.create());
+		User user = new User("user","email","pass",VaadinIcon.HOME);
+		User user1 = new User("nick","email1","pass",VaadinIcon.USER);
 		user.setRoles(roles);
 		userService.addUser(user);
 		userService.addUser(user1);

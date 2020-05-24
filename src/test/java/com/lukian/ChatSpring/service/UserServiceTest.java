@@ -6,13 +6,18 @@ import com.lukian.ChatSpring.repo.UserRepo;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RunWith(SpringRunner.class)
+@DataJpaTest
 class UserServiceTest {
 
     @Autowired
@@ -23,7 +28,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         this.userService = new UserService(userRepo);
-        user = new User("nickname1","uniqueemail1","password", VaadinIcon.STAR.create());
+        user = new User("nickname1","uniqueemail1","password", VaadinIcon.STAR);
         Set<Role> roles = new HashSet<Role>();
         roles.add(Role.USER);
         user.setRoles(roles);

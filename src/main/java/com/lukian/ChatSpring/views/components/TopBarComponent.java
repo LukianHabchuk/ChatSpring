@@ -3,10 +3,13 @@ package com.lukian.ChatSpring.views.components;
 import com.lukian.ChatSpring.views.GreetingComponent;
 import com.lukian.ChatSpring.views.MainView;
 import com.lukian.ChatSpring.views.chat.ChatView;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.shared.Registration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TopBarComponent extends HorizontalLayout {
@@ -24,10 +27,14 @@ public class TopBarComponent extends HorizontalLayout {
 
     Div routerLink() {
         Div menu = new Div();
-        menu.add(new RouterLink("MainView", MainView.class));
-        menu.add(new RouterLink("ChatView", ChatView.class));
-        menu.add(new RouterLink("Greeting",
-                GreetingComponent.class, "default"));
+        Button mainView = new Button("MainView");
+        Button chatView = new Button("ChatView");
+        Button greetingView = new Button("Greeting");
+        mainView.addClickListener(c -> UI.getCurrent().navigate(MainView.class));
+        chatView.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(ChatView.class));
+        greetingView.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(GreetingComponent.class));
+
+        menu.add(mainView, chatView, greetingView);
         return menu;
     }
 

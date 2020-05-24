@@ -1,6 +1,7 @@
 package com.lukian.ChatSpring.entity;
 
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -19,7 +20,7 @@ public class User {
     private String email;
     @NotBlank(message = "Password cannot be empty")
     private String password;
-    private Icon icon;
+    private VaadinIcon icon;
     private boolean active;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
@@ -29,7 +30,7 @@ public class User {
     public User() {
     }
 
-    public User(String nick, String email, String password, Icon icon) {
+    public User(String nick, String email, String password, VaadinIcon icon) {
         this.nick = nick;
         this.email = email;
         this.password = password;
@@ -60,11 +61,11 @@ public class User {
         this.password = password;
     }
 
-    public Icon getIcon() {
+    public VaadinIcon getIcon() {
         return icon;
     }
 
-    public void setIcon(Icon icon) {
+    public void setIcon(VaadinIcon icon) {
         this.icon = icon;
     }
 
